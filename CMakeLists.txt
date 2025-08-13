@@ -3,5 +3,5 @@ project(turn-based_rpg_game_cli C)
 
 set(CMAKE_C_STANDARD 17)
 
-add_executable(untitled4 main.c
+add_executable(turn-based_rpg_game_cli main.c
 )
