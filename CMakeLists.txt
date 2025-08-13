@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
-project(untitled4 C)
+project(turn-based_rpg_game_cli C)
 
 set(CMAKE_C_STANDARD 17)
 
