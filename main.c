@@ -4,7 +4,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#define DEFENSE_BOOST 2
 #define MAX_HEALTH 100
 
 enum ACTIONS {
@@ -17,6 +16,7 @@ typedef struct {
     float damage;
     float defense;
     int cures;
+    int boostDefense;
 } Entity;
 
 void printUI(Entity *player, Entity *enemy);
@@ -34,13 +34,17 @@ void heal(Entity *target);
 int main() {
     srand(time(NULL));
 
-    Entity player = {"Player", MAX_HEALTH, 25.2f, 3.2f, 3};
-    Entity enemy = {"Enemy", MAX_HEALTH, 27.8f, 5.3f, 4};
+    Entity player = {"Player", MAX_HEALTH, 25.2f, 3.2f, 3, 0};
+    Entity enemy = {"Enemy", MAX_HEALTH, 27.8f, 5.3f, 4, 0};
     int gameOver = 0, currentTurn = 0, action = 0, isActionInvalid = 0;
-    char *winner = malloc(sizeof(char) * 20);
+    char winner[20];
 
     while (!gameOver) {
-        system("clear");
+        #ifdef _WIN32
+            system("cls");
+        #else
+            system("clear");
+        #endif
         printUI(&player, &enemy);
 
         if (currentTurn % 2 == 0) {
@@ -77,7 +81,6 @@ int main() {
 
     system("clear");
     printf("%s wins!", winner);
-    free(winner);
     return 0;
 }
 
@@ -122,12 +125,17 @@ void sortAction(Entity *actioner, Entity *target, const int *action, int *invali
 
 void attack(Entity *attacker, Entity *target) {
     printf("\n%s attacks %s\n", attacker->name, target->name);
-    target->health -= attacker->damage - target->defense;
+    float attack = attacker->damage;
+    if (target->boostDefense) {
+        attack -= target->defense;
+        target->boostDefense = 0;
+    }
+    target->health -= attack;
 }
 
 void defend(Entity *target) {
     printf("\n%s defends himself\n", target->name);
-    target->defense += DEFENSE_BOOST;
+    target->boostDefense = 1;
 }
 
 void heal(Entity *target) {
@@ -145,8 +153,8 @@ void heal(Entity *target) {
     target->health += 10;
 
     if (target->health > MAX_HEALTH) {
-        float healthOver = MAX_HEALTH - target->health;
-        target->health -= healthOver;
+        target->health = MAX_HEALTH;
     }
+
     target->cures--;
 }
